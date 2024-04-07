@@ -1,5 +1,6 @@
 import express from 'express'
 import mongoose from 'mongoose'
+import Cors from 'cors'
 import Messages from './dbMessages.js'
 
 //App Config
@@ -8,12 +9,15 @@ const port = process.env.PORT || 9000
 const connection_url = 'mongodb+srv://khoi2pham:matnaden@cluster0.exlyxrp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
 
 //Middleware
+app.use(express.json())
+app.use(Cors)
+
 //DB Config
-mongoose.connect(connection_url, {
-    useNewUrlParser: true,
+mongoose.connect(connection_url
+    //useNewUrlParser: true,
     // useCreateIndex: true,
-    useUnifiedTopology: true
-})
+    //useUnifiedTopology: true
+)
 .then(() => {
     console.log("Connected to MongoDB");
 })
@@ -25,7 +29,7 @@ mongoose.connect(connection_url, {
 app.get("/", (req, res) => res.status(200).send("Hello The Web Dev"))
 
 app.post('/messages/new', (req, res) => {
-    const dbMEssage = req.body
+    const dbMessage = req.body
     Messages.create(dbMessage, (err, data) => {
         if(err){
             res.status(500).send(err)
