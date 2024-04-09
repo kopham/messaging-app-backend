@@ -2,11 +2,21 @@ import express from 'express'
 import mongoose from 'mongoose'
 import Cors from 'cors'
 import Messages from './dbMessages.js'
+import Pusher from 'pusher'
 
 //App Config
 const app = express()
 const port = process.env.PORT || 9000
 const connection_url = 'mongodb+srv://khoi2pham:matnaden@cluster0.exlyxrp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
+
+// For pusher
+const pusher = new Pusher({
+    appId: "1785322",
+    key: "67e04ac25de523ac99c0",
+    secret: "b196ba898446bf6bad2e",
+    cluster: "us3",
+    useTLS: true
+});
 
 //Middleware
 app.use(express.json())
@@ -45,6 +55,27 @@ app.get('/messages/sync', async (req, res) => {
     }catch (err){
         res.status(500).send(err)
     }
+})
+
+const db = mongoose.connection
+db.once("open", () => {
+    console.log("DB Connected")
+    const msgCollection = db.collection("messagingmessages")
+    const changeStream = msgCollection.watch()
+    changeStream.on('change', change => {
+        console.log(change)
+        if(change.operationType === "insert"){
+            const messageDetails = change.fullDocument
+            pusher.trigger("messages", "inserted",{
+                name: messageDetails.name,
+                message: messageDetails.message,
+                timestamp: messageDetails.timestamp,
+                received: messageDetails.received
+            })
+        } else{
+            console.log('Error triggering Pusher')
+        }
+    })
 })
 
 //Listener
