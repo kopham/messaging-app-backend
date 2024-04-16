@@ -4,7 +4,6 @@ import Cors from 'cors'
 import Messages from './dbMessages.js'
 import Pusher from 'pusher'
 
-//App Config
 const app = express()
 const port = process.env.PORT || 9000
 const connection_url = 'mongodb+srv://khoi2pham:matnaden@cluster0.exlyxrp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
